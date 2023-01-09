@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Runtime.Versioning;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -22,7 +23,7 @@ namespace School.Lab2
             do
             {
                 Console.WriteLine();
-                Console.WriteLine("* To see all employees, please press [1] and 'Enter'\n* Show how many employees the school has, please press [2] and 'Enter'\n* Show all classes. Please press [3] and 'Enter'\n* To add new employee. Please press [4] and 'Enter'\n* Exit Program? Press [5] and 'Enter'");
+                Console.WriteLine("* To see all employees, please press [1] and 'Enter'\n* Show how many employees the school has, please press [2] and 'Enter'\n* To see infomation, please press[3]\n* Exit Program? Press [4] and 'Enter'");
                 var menuOptions = Console.ReadLine();
                 switch (menuOptions)
                 {
@@ -39,21 +40,14 @@ namespace School.Lab2
                         NumOfStaff();
                         MenuVisitor();
                         break;
-                    case "3":
+                        case"3":
                         Console.WriteLine("Just wait a second, your requested data will appear soon");
                         Console.WriteLine();
                         VisitorMenu visitormenu3 = new VisitorMenu();
-                        //GetAllStudentsClass();
+                        Information();
                         MenuVisitor();
                         break;
                     case "4":
-                        Console.WriteLine("Just wait a second, your requested data will appear soon");
-                        Console.WriteLine();
-                        VisitorMenu visitormenu4 = new VisitorMenu();
-                        //();
-                        MenuVisitor();
-                        break;
-                    case "5":
                         Console.WriteLine("*");
                         Thread.Sleep(150);
                         Console.WriteLine("*");
@@ -84,17 +78,18 @@ namespace School.Lab2
             Console.WriteLine("Here is a list of all employees");
             Console.WriteLine();
 
-            SqlDataAdapter sqlda = new SqlDataAdapter("SELECT FirstName, LastName, YearOfEmployment, Titel FROM Employee\r\n" +
-            "JOIN Titel ON TitelId = FK_TitelId\r\n" +
+            SqlDataAdapter sqlda = new SqlDataAdapter("SELECT FirstName, LastName, YearOfEmployment, Title FROM Employee\r\n" +
+            "JOIN Title ON TitleId = FK_TitleId\r\n" +
             "ORDER BY FirstName", sqlCon);
             DataTable dtbl = new DataTable();
             sqlda.Fill(dtbl);
+            sqlda.Dispose();
 
-            Console.WriteLine("{0, -2} | {1, -16} | {2, -25} | {3, -15}", "First name", "Last name", "Year of employment", "Titel");
+            Console.WriteLine("{0, -2} | {1, -16} | {2, -25} | {3, -15}", "First name", "Last name", "Year of employment", "Title");
             Console.WriteLine(new string('-', 65));
             foreach (DataRow dr in dtbl.Rows)
             {
-                Console.WriteLine("{0, -10} | {1, -16} | {2, -25} | {3, -15} ", dr["FirstName"], dr["LastName"], dr["YearOfEmployment"], dr["Titel"]);
+                Console.WriteLine("{0, -10} | {1, -16} | {2, -25} | {3, -15} ", dr["FirstName"], dr["LastName"], dr["YearOfEmployment"], dr["Title"]);
             }
             Console.WriteLine(new string('-', 65));
             Console.WriteLine();
@@ -125,6 +120,12 @@ namespace School.Lab2
             var db = new SchoolDbContext();
             var count = db.Employees.Count();
             Console.WriteLine("Number of employees: " + count);
+        }
+
+        public static void Information()
+        {
+            Console.Clear();
+            Console.WriteLine("Hi, welcome to high school SEVEN's website.\nHere are some contact information:\nPhonenumber: 555667788\nEmail: highschoolseven@seven.com\nYou are more then welcome to contact us for any information needed. We are looking forward to here from you!");
         }
 
     }

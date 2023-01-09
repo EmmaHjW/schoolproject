@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,21 +21,21 @@ namespace School.Lab2
             do
             {
                 Console.WriteLine();
-                Console.WriteLine("* To add new employee, please press [1] and 'Enter'\n* To add a new student, Please press [2] and 'Enter'\n* To see students grades, please press [3] and 'Enter'\n* Exit Program? Press [4] and 'Enter'");
+                Console.WriteLine("* To add new employee, please press [1] and 'Enter'\n* To add a new student, please press [2] and 'Enter'\n* To see students grades, please press [3] and 'Enter'\n* To see each departments salary, please press [4] and 'Enter'\n* To see each departments averange salary, please press [5] and 'Enter'\n* Exit Program? Press [6] and 'Enter'");
                 var menuOptions = Console.ReadLine();
                 switch (menuOptions)
                 {
                     case "1":
                         Console.WriteLine("Just wait a second, your requested data will appear soon");
                         AdminMenu adminmenu = new AdminMenu();
-                        AddStaff(); 
+                        AddStaff();
                         MenuAdmin();
                         break;
                     case "2":
                         Console.WriteLine("Just wait a second, your requested data will appear soon");
                         Console.WriteLine();
                         AdminMenu adminmenu2 = new AdminMenu();
-                        AddStudent(); 
+                        AddStudent();
                         MenuAdmin();
                         break;
                     case "3":
@@ -45,6 +46,20 @@ namespace School.Lab2
                         MenuAdmin();
                         break;
                     case "4":
+                        Console.WriteLine("Just wait a second, your requested data will appear soon");
+                        Console.WriteLine();
+                        AdminMenu adminmenu4 = new AdminMenu();
+                        Salary();
+                        MenuAdmin();
+                        break;
+                    case "5":
+                        Console.WriteLine("Just wait a second, your requested data will appear soon");
+                        Console.WriteLine();
+                        AdminMenu adminmenu5 = new AdminMenu();
+                        AvgSalary();
+                        MenuAdmin();
+                        break;
+                    case "6":
                         Console.WriteLine("*");
                         Thread.Sleep(150);
                         Console.WriteLine("*");
@@ -84,18 +99,18 @@ namespace School.Lab2
                 else
                 {
                     Console.WriteLine("Select 1-4");
-                } 
+                }
             }
             string query = "";
             if (newTitle == 1)
             {
-                    query = "INSERT INTO dbo.Employee (FirstName, LastName, PersonalNumber, FK_TitleId)" +
-                    "VALUES (@firstName, @lastName, @personalNumber, @newTitle)" +
-                    "INSERT INTO dbo.Employee_Course (FK_EmployeeId, FK_CourseId)" +
-                    "VALUES (IDENT_CURRENT ('Employee'), @newId)";
+                query = "INSERT INTO dbo.Employee (FirstName, LastName, PersonalNumber, FK_TitleId)" +
+                "VALUES (@firstName, @lastName, @personalNumber, @newTitle)" +
+                "INSERT INTO dbo.Employee_Course (FK_EmployeeId, FK_CourseId)" +
+                "VALUES (IDENT_CURRENT ('Employee'), @newId)";
 
                 Console.WriteLine("Enter CourseId;\n[1] = Math 1, [2] = Math 2, [3] = Math 3\n[4] = English 1, [5] = English 2, [6] = English 3\n[7] = Sience 1, [8] = Sience 2, [9] = Sience 3\n[10] = Athletics\n[0] = Principal, Administrator, Janitor");
-                
+
                 int newId;
                 while (true)
                 {
@@ -139,8 +154,8 @@ namespace School.Lab2
             }
             else
             {
-               var query2 = "INSERT INTO dbo.Employee (FirstName, LastName, PersonalNumber, FK_TitleId) " +
-                         "VALUES (@firstName, @lastName, @personalNumber, @newTitle)";
+                var query2 = "INSERT INTO dbo.Employee (FirstName, LastName, PersonalNumber, FK_TitleId) " +
+                          "VALUES (@firstName, @lastName, @personalNumber, @newTitle)";
                 try
                 {
                     string conString = "Data Source=LAPTOP-EQE3P3DB; Initial Catalog=School; Integrated Security=true";
@@ -167,6 +182,7 @@ namespace School.Lab2
                 {
                     Console.WriteLine("OOPs, Somthing went wrong" + e);
                 }
+                
             }
         }
         public static void AddStudent()
@@ -209,6 +225,7 @@ namespace School.Lab2
                     cmd.Parameters.AddWithValue("@personalnumber", personalNumber);
                     cmd.Parameters.AddWithValue("@classId", newId);
                     SqlDataReader sdr = cmd.ExecuteReader();
+                    connection.Close();
 
                     Console.WriteLine();
                     Console.WriteLine($"We welcome {firstName} {lastName}");
@@ -223,76 +240,90 @@ namespace School.Lab2
 
         public static void Grade()
         {
-                Console.Clear();
+            Console.Clear();
 
-                SqlConnection sqlCon = new SqlConnection(@"Data Source=LAPTOP-EQE3P3DB; Initial Catalog=School; Integrated Security=true");
+            SqlConnection sqlCon = new SqlConnection(@"Data Source=LAPTOP-EQE3P3DB; Initial Catalog=School; Integrated Security=true");
 
-                Console.WriteLine("Here you can see a list of all students grades in all courses");
-                Console.WriteLine();
+            Console.WriteLine("Here you can see a list of all students grades in all courses");
+            Console.WriteLine();
 
-                SqlDataAdapter sqlda = new SqlDataAdapter("SELECT FirstName, LastName, GradeInfo, SetDate, CourseInfo FROM Grade\r\n" +
-                            "JOIN Student ON FK_StudentId = StudentId\r\n" +
-                            "JOIN Course ON CourseId = FK_CourseId\r\n" +
-                            "WHERE SetDate >= DATEADD(month, -1, GETDATE())\r\n" +
-                            "ORDER BY SetDate", sqlCon);
+            SqlDataAdapter sqlda = new SqlDataAdapter("SELECT FirstName, LastName, GradeInfo, SetDate, CourseInfo FROM Grade\r\n" +
+                        "JOIN Student ON FK_StudentId = StudentId\r\n" +
+                        "JOIN Course ON CourseId = FK_CourseId\r\n" +
+                        "ORDER BY SetDate", sqlCon);
 
-                DataTable grade = new DataTable();
-                sqlda.Fill(grade);
+            DataTable grade = new DataTable();
+            sqlda.Fill(grade);
 
-                foreach (DataRow gr in grade.Rows)
-                {
-                    Console.WriteLine($"{gr["FirstName"]} {gr["LastName"]}, {gr["GradeInfo"]}, {gr["SetDate"]}, {gr["CourseInfo"]}");
-                }
-                Console.WriteLine();
-                Console.WriteLine("To see menu again, press 'Enter'");
-                Console.ReadKey();
+            Console.WriteLine("{0, -2} | {1, -12} | {2, -10} | {3, -20} | {4, -22}", "First name", "Last name", "Grade info", "Date", "Course");
+            Console.WriteLine(new string('-', 65));
+            foreach (DataRow gr in grade.Rows)
+            {
+                Console.WriteLine("{0, -10} | {1, -12} | {2, -10} | {3, -20} | {4, -22} ", gr["FirstName"], gr["LastName"], gr["GradeInfo"], gr["SetDate"], gr["CourseInfo"]);
+            }
+            Console.WriteLine();
+            Console.WriteLine("To see menu again, press 'Enter'");
+            Console.ReadKey();
+            sqlCon.Close();
         }
-        
-        
-        
-        
-  
-        //public static void GetAllStudentsClass()
-        //{
-        //    Console.Clear();
-        //    using (var context = new SchoolContext())
-        //    {
-        //        var myStudents3 = from c in context.Classes
-        //                          select c;
-        //        foreach (var c in myStudents3)
-        //        {
-        //            Console.WriteLine($"{c.ClassId}, {c.ClassName}");
-        //        }
-        //        Console.WriteLine("To see students in one class, press 1, 2 or 3.");
-        //        bool id = true;
-        //        while (id)
-        //        {
-        //            var classInput = Console.ReadLine();
-        //            int setClassId = 0;
-        //            if (Int32.TryParse(classInput, out setClassId))
-        //            {
-        //                id = false;
-        //                var myStudents4 = from s in context.Students
-        //                                  join c in context.Classes
-        //                                  on s.FkClassId equals c.ClassId
-        //                                  where c.ClassId == setClassId
-        //                                  select new
-        //                                  {
-        //                                      s.FirstName,
-        //                                      s.LastName,
-        //                                      c.ClassName
-        //                                  };
-        //                foreach (var c in myStudents4)
-        //                {
-        //                    Console.WriteLine(c.FirstName, c.LastName, c.ClassName);
-        //                }
-        //            }
-        //            else
-        //            {
-        //                Console.WriteLine("Wrong input, try id 1-3");
-        //            }
-        //        }
-        //    }
-        //}
+        public static void Salary()
+        {
+            Console.Clear();
+
+            SqlConnection sql = new SqlConnection(@"Data Source=LAPTOP-EQE3P3DB; Initial Catalog=School; Integrated Security=true");
+
+            Console.WriteLine("Here is a list of what each department pays out each month");
+            Console.WriteLine();
+
+            SqlDataAdapter sql1 = new SqlDataAdapter("SELECT Title, result1.Total\r\n" +
+                "FROM Title,\r\n" +
+                "(SELECT Employee.FK_TitleId, " +
+                "SUM(Salary) Total\r\n" +
+                "FROM Employee\r\n" +
+                "GROUP BY FK_TitleId) AS result1\r\n" +
+                "WHERE result1.FK_TitleId = Title.TitleId", sql);
+
+            DataTable salary = new DataTable();
+            sql1.Fill(salary);
+            sql1.Dispose();
+
+            foreach (DataRow sa in salary.Rows)
+            {
+                Console.WriteLine($"{sa["Title"]} {sa["Total"]}:-");
+            }
+            Console.WriteLine();
+            Console.WriteLine("To see menu again, press 'Enter'");
+            Console.ReadKey();
+        }
+        public static void AvgSalary()
+        {
+            Console.Clear();
+
+            SqlConnection sql = new SqlConnection(@"Data Source=LAPTOP-EQE3P3DB; Initial Catalog=School; Integrated Security=true");
+
+            Console.WriteLine("Here is the averange salary at each department");
+            Console.WriteLine();
+
+            SqlDataAdapter sql2 = new SqlDataAdapter("SELECT Title, result1.Averange_Salary\r\n" +
+                "FROM Title,\r\n" +
+                "(SELECT Employee.FK_TitleId, AVG(Salary) Averange_Salary\r\n" +
+                "FROM Employee\r\n" +
+                "GROUP BY FK_TitleId) AS result1\r\n" +
+                "WHERE result1.FK_TitleId = Title.TitleId", sql);
+
+            DataTable avgSalary = new DataTable();
+            sql2.Fill(avgSalary);
+            sql2.Dispose();
+
+            foreach (DataRow asa in avgSalary.Rows)
+            {
+                Console.WriteLine($"{asa["Title"]} {asa["Averange_Salary"]}:-");
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("To see menu again, press 'Enter'\"");
+            Console.ReadKey();
+        }
+       
     }
 }
